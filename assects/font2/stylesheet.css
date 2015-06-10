@@ -1,0 +1,30 @@
+@font-face {
+    font-family:'futura_oblique';
+    src: url('futura_oblique-webfont.eot');
+    src: url('futura_oblique-webfont.eot?#iefix') format('embedded-opentype'),
+         url('futura_oblique-webfont.woff2') format('woff2'),
+         url('futura_oblique-webfont.woff') format('woff'),
+         url('futura_oblique-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family:'candara';
+    src: url('candara.eot');
+    src: url('candara.eot?#iefix') format('embedded-opentype'),
+         url('candara.woff2') format('woff2'),
+         url('candara.woff') format('woff'),
+         url('candara.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,516 @@
+<?php
+include("uniformcommon.php");
+include("include/allschoolheader.php");
+getpostregistergloble('start','cat','subcat','seasonalcat');
+$con=$uniform->connection();
+$sessional_access= $uniform->dbselectmulti("select * from seasonal_categories where status=1");
+$seasonalcatexp = explode(",", $seasonalcat);
+$category_access= $uniform->dbselectmulti("select * from kids_category where status=1");
+if(isset($start))
+$start=$start;
+else
+$start=0;
+$limit=100;
+if(isset($_SESSION['stateid']))
+$state=$_SESSION['stateid'];
+else
+$state=NULL;
+if(isset($_SESSION['cityid']))
+$city=$_SESSION['cityid'];
+else
+$city=NULL;
+if(isset($_SESSION['schoolid'])){
+$school=$_SESSION['schoolid'];
+}
+else{
+header("location:index.php");
+exit;
+}
+?>
+<script type="text/javascript">
+function getUrlVars() {
+	var vars = {};
+	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+		vars[key] = value;
+	});	
+	return vars;
+}
+function seasonalcat(allval){
+	var cat = getUrlVars()["cat"];
+	var seasonalcat = getUrlVars()["seasonalcat"];
+	var subcat = getUrlVars()["subcat"];
+    var val = [];
+	var i=0;
+	if(allval!=''){
+    $("#seasonalright").find('input:checked').each(function(){
+		if($(this).val()!='')
+	 val[i++] = $(this).val();
+    });	
+	}
+
+	if(cat!=null && subcat!=null)
+	{	
+		window.location='?cat='+cat+'&seasonalcat='+val+'&subcat='+subcat;
+	}
+	else if(subcat==null && cat!=null)
+	{
+		window.location='?cat='+cat+'&seasonalcat='+val;
+	}
+	else if(subcat!=null && cat==null)
+	{
+		window.location='?seasonalcat='+val+'&subcat='+subcat;
+	}
+	else
+	{
+		window.location='?seasonalcat='+val;
+	}
+  }
+  
+function category(allcat){
+	var cat = getUrlVars()["cat"];
+	var seasonalcat = getUrlVars()["seasonalcat"];
+	var subcat = getUrlVars()["subcat"];
+    var val = [];
+	var i=0;
+	if(allcat!=''){
+    $("#catsubcat").find('input:checked').each(function(){
+		if($(this).val()!='')
+      val[i++] = $(this).val();
+    });	
+	}
+	if(seasonalcat!=null && subcat!=null && cat!=null)
+	{	
+		window.location='?cat='+cat+'&seasonalcat='+seasonalcat+'&subcat='+val;
+	}
+	else if(seasonalcat!=null && subcat!=null)
+	{
+		window.location='?seasonalcat='+seasonalcat+'&subcat='+val;
+	}
+	else if(seasonalcat==null && cat!=null)
+	{
+		window.location='?cat='+cat+'&subcat='+val;
+	}
+	else if(seasonalcat!=null && cat!=null)
+	{
+		window.location='?cat='+cat+'&seasonalcat='+seasonalcat+'&subcat='+val;
+	}
+	else if(seasonalcat!=null && cat==null && subcat==null)
+	{
+	   window.location='?seasonalcat='+seasonalcat+'&subcat='+val;
+	}
+	else
+	{
+		window.location='?subcat='+val;
+	}
+
+  }
+  function uniformcategory(){
+	var seasonalcat = getUrlVars()["seasonalcat"];
+	var subcat = getUrlVars()["subcat"];
+	var cat = getUrlVars()["cat"];	
+    var val = [];
+	$("#urlcat").find('input:checked').each(function(i){
+	 if(this.name=="cat")
+      val[i] = $(this).val();
+    });	
+	//alert(val);
+	if(seasonalcat==null && subcat!=null)
+	{	
+		window.location='?cat='+val+'&subcat='+subcat;
+	}
+	else if(seasonalcat!=null && subcat==null)
+	{
+		 window.location='?cat='+val+'&seasonalcat='+seasonalcat;
+	}
+	else if(seasonalcat!=null && subcat!=null)
+	{
+		window.location='?cat='+val+'&seasonalcat='+seasonalcat+'&subcat='+subcat;
+	}
+	else
+	{
+		 window.location='?cat='+val;
+	}
+  }
+ /* size guide pop up*/
+jQuery(function($) {
+	$("a.topopup").click(function() {
+		var imgid=$(this).attr('id');
+		var loadname=$(this).attr('name');
+		var img="<img src=sizeguideimg/"+imgid+" />";
+		//alert(img);
+		$('#imgid').html(img);
+			loading(loadname); // loading
+			setTimeout(function(){ // then show popup, deley in .5 second
+				loadPopup(loadname); // function show popup 
+			}, 500); // .5 second
+	return false;
+	});
+	
+	/* event for close the popup */
+	$("div.close").hover(
+					function() {
+						$('span.ecs_tooltip').show();
+					},
+					function () {
+    					$('span.ecs_tooltip').hide();
+  					}
+				);
+	
+	$("div.close").click(function() {
+		disablePopup();  // function close pop up
+	});
+	
+	$(this).keyup(function(event) {
+		if (event.which == 27) { // 27 is 'Ecs' in the keyboard
+			disablePopup();  // function close pop up
+		}  	
+	});
+	
+	$("div#backgroundPopup").click(function() {
+		disablePopup();  // function close pop up
+	});
+	;
+	
+
+	 /************** start: functions. **************/
+	function loading(val) {
+		$("#"+val).show();  
+	}
+	function closeloading(val) {
+		$("#"+val).fadeOut('normal');  
+	}
+	
+	var popupStatus = 0; // set value
+	
+	function loadPopup(val) { 
+		if(popupStatus == 0) { // if value is 0, show popup
+			closeloading(val); // fadeout loading
+			$("#toPopup").fadeIn(0500); // fadein popup div
+			$("#backgroundPopup").css("opacity", "0.7"); // css opacity, supports IE7, IE8
+			$("#backgroundPopup").fadeIn(0001); 
+			popupStatus = 1; // and set value to 1
+		}	
+	}
+		
+	function disablePopup() {
+		if(popupStatus == 1) { // if value is 1, close popup
+			$("#toPopup").fadeOut("normal");  
+			$("#backgroundPopup").fadeOut("normal");  
+			popupStatus = 0;  // and set value to 0
+		}
+	}
+	/************** end: functions. **************/
+}); // jQuery End 
+</script>
+<!-- Container Starts Here -->
+<div class="asu_container">
+<div class="innerContainer">
+<div class="filterRightOuter">
+<!--  start category -- -->
+<div class="filterRight" id="seasonalright">
+<dl>
+<dt>SEASONAL CLOTHING</dt>
+<dd><input id="" class="chk" type="checkbox" onClick="return seasonalcat(this.value);" value="" <?php if($seasonalcat=="" || $seasonalcat=='all') { ?> checked="checked" <?php  }?> />All Uniform</dd>
+<?php
+foreach($sessional_access as $category) { ?>
+<dd><input id="Checkbox<?php  echo $category['id']; ?>" class="chk" type="checkbox" onClick="return seasonalcat();" value="<?php echo $category['id'];?>" <?php 
+if(in_array($category['id'],$seasonalcatexp)) { ?> checked="checked" <?php  }?> /><?php  echo $category['scname'];?></dd>
+<?php  } ?>
+</dl>
+</div>
+<!-- secand categoty -->
+
+<?php if(empty($subcat)) { ?>
+<!-- hide if subcat is empty  -->
+
+<div class="filterRight" id="catsubcat">
+<input type="hidden" value="<?php if(isset($_GET['cat'])){ echo $_GET['cat'];} else {echo '';}?>" name="cat" id="cat">
+<?php
+$i=1;
+foreach($category_access as $category)
+{
+$catid=$category['kcid'];	
+?>
+<dl>
+<dt><?php  echo $category['name']; ?></dt>
+<!-- <dd><input id="" class="chk" type="checkbox" onClick="return category(this.value);" value="" <?php //if($subcat=="" || $subcat=='all') { ?> checked="checked" <?php // }?> />All Class</dd> -->
+<?php
+$sub_category_access= $uniform->dbselectmulti("select * from kids_sub_category where cat_id='$catid' and status=1");
+$subcatlen = explode(",", $subcat);
+foreach($sub_category_access as $subcategory)
+{
+?>
+
+<dd><input id="Checkbox<?php echo $i; ?>" class="chk" type="checkbox" onClick="return category();" value="<?php  echo $subcategory['id'];?>"  <?php  foreach($subcatlen as $scatl){ 
+      if($subcategory['id'] == $scatl || $subcategory['id'] == 14 ) { ?> checked="checked" <?php } }?> />
+<?php  echo $subcategory['name'];?></dd>
+<?php  $i++;}?>
+</dl>
+<?php }?>
+</div>
+
+<?php }   ?> <!-- if not  empty then hide --> 
+
+<?php  if(!empty($subcat)){  ?>  
+<div class="filterRight" id="catsubcat">
+<input type="hidden" value="<?php if(isset($_GET['cat'])){ echo $_GET['cat'];} else {echo '';}?>" name="cat" id="cat">
+<?php
+$i=1;
+foreach($category_access as $category)
+{
+$catid=$category['kcid'];	
+?>
+<dl>
+<dt><?php  echo $category['name']; ?></dt>
+<!-- <dd><input id="" class="chk" type="checkbox" onClick="return category(this.value);" value="" <?php //if($subcat=="" || $subcat=='all') { ?> checked="checked" <?php // }?> />All Class</dd> -->
+<?php
+$sub_category_access= $uniform->dbselectmulti("select * from kids_sub_category where cat_id='$catid' and status=1");
+$subcatlen = explode(",", $subcat);
+foreach($sub_category_access as $subcategory)
+{
+?>
+
+<dd><input id="Checkbox<?php echo $i; ?>" class="chk" type="checkbox" onClick="return category();" value="<?php  echo $subcategory['id'];?>"  <?php  foreach($subcatlen as $scatl){ 
+      if($subcategory['id'] == $scatl || $subcategory['id'] == 1 ) { ?> checked="checked" <?php } }?> />
+<?php  echo $subcategory['name'];?></dd>
+<?php  $i++;}?>
+</dl>
+<?php }?>
+</div>
+
+<?php } ?>
+<!-- - end  scand  category --> 
+</div>
+<div class="productPanel" style="width:800px; float:right;">
+<div class="searchedSchool">
+<?php $sqlschool="select * from tbl_school where status=1 and scid='".$_SESSION['schoolid']."'";
+ $sqlschoolval=$uniform->dbselect($sqlschool);?>
+ <div class="imageContainer">
+<?php if($sqlschoolval['url']!=''){ echo '<a  href="'.$sqlschoolval['url'].'" target="_blank">'; } ?>
+<img src="schoolimage/<?php echo $sqlschoolval['schoolimage'];?>" align="middle" alt="School Name" />
+<?php if($sqlschoolval['url']!=''){ echo '</a>'; } ?>
+</div>
+<div class="schoolDetail">
+<h2><?php if($sqlschoolval['url']!=''){ echo '<a  href="'.$sqlschoolval['url'].'" target="_blank">'; } echo $sqlschoolval['schoolname'].'&nbsp;Uniforms'; 
+ if($sqlschoolval['url']!=''){ echo '</a>'; } ?> </h2>
+<p><?php echo $sqlschoolval['address'];?></p>
+</div>
+<div class="mfix"></div>
+</div>
+<div class="uniform_fillter">
+<?php
+$uniform_type= $uniform->dbselectmulti("select * from uniform_category where status='active'");
+$catlen = explode(",", $cat);
+$result = sizeof($catlen);
+
+$alluniform=NULL;
+foreach($uniform_type as $type){ 
+if($alluniform==NULL)
+{
+$seprator=NULL;	
+}
+else
+{
+$seprator=',';
+}
+$alluniform=$alluniform.$seprator.$type['id'];
+} ?>
+<div class="mfix"></div>
+<div>
+<h2>UNIFORM TYPE</h2>
+<a href="?cat=<?php echo $alluniform; if($seasonalcat!=""){?>&seasonalcat=<?php echo $seasonalcat;} if($subcat!=""){?>&subcat=<?php echo $subcat;}?>" class="all_unif">All Uniforms<span <?php if($cat==$alluniform || empty($cat)){?>class="selected" <?php } ?>></span></a>
+ <?php 
+  foreach($uniform_type as $type1){
+	  if($type1['allschool']!=1){
+	 $unifrmcss=explode(" ",$type1['category_name']); 
+ ?>
+   <a href="?cat=<?php echo $type1['id']; if($seasonalcat!=""){?>&seasonalcat=<?php echo $seasonalcat;} if($subcat!=""){?>&subcat=<?php echo $subcat;}?>" class="<?php echo strtolower($unifrmcss[0]);?>"><?php echo $type1['category_name'];?><span <?php if($cat==$type1['id']){?>class="selected" <?php } ?>></span></a>
+  <?php } }?>
+  </div>
+
+<div class="mfix"></div>
+</div>
+<div class="mfix"></div>
+
+<div class="innerContentPanel product_listing" style="position:relative;">
+<div id="floatDiv">
+<a href="help.php" id="openChart"><img src="img/sizechartButton.png" /></a>
+</div>
+
+<ul class="productList" id="showproduct">
+<!--<table cellpadding="5" cellspacing="0" border="0" class="listing_table">
+<tr>
+	<th align="left">Product</th>
+    <th style="width:250px !important;"></th>
+    <th style="width:100px;" align="center">PRICE</th>
+    <th>Freebies</th>
+    <th>QTY/SIZE</th>
+</tr>-->
+<?php 
+$con=$uniform->connection(); 
+if((isset($cat) && $cat!="") && (isset($subcat) && $subcat!="" && (isset($seasonalcat) && $seasonalcat!=""))){
+
+	echo '1';
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and category in($cat) and sub_uniform_category in($subcat) and seasonal_categories in ($seasonalcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+}
+else if((isset($subcat) && $subcat!="") && (isset($cat) && $cat!="") && $seasonalcat=="")
+{
+	echo '2';
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and category in($cat) and sub_uniform_category in ($subcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+}
+else if((isset($cat) && $cat!="") && (isset($seasonalcat) && $seasonalcat!="")  && $subcat=="")
+{
+	echo '3';
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and category in($cat) and seasonal_categories in($seasonalcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+}
+else if((isset($subcat) && $subcat!="") && (isset($seasonalcat) && $seasonalcat!="")  && $cat=="")
+{
+	echo '4';
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and sub_uniform_category in($subcat) and seasonal_categories in($seasonalcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+}
+else if((isset($subcat) && $subcat!="") && (isset($cat) && $cat!="")  && $seasonalcat=="")
+{
+	echo '5';
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and sub_uniform_category in($subcat) and category in($cat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+}
+else if((isset($cat) && $cat!="") && $subcat==""  && $seasonalcat=="")
+{
+	echo '6';
+$subcat =14;
+
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and category in($cat) and sub_uniform_category in ($subcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+
+
+/*$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and category in($cat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+*/}
+else if((isset($seasonalcat) && $seasonalcat!="") && $subcat==""  && $cat=="")
+{
+	echo '7';
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and seasonal_categories in($seasonalcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+}
+else if((isset($subcat) && $subcat!="") && $seasonalcat==""  && $cat=="")
+{
+	echo '8';
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and sub_uniform_category in($subcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+}
+else{
+	echo '9';
+
+	$subcat=14;
+$sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1 and sub_uniform_category in($subcat) and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";
+
+
+/* $sqlproduct="select product.*,freebies.proid as fproid,freebies.`status` as fstatus from product left join freebies on product.proid = freebies.onproduct where product.`status`=1  and stid='$state' and ctid='$city' and scid='$school' limit $start,$limit";*/
+}
+$product=$uniform->dbselectmulti($sqlproduct);
+$uniform->close($con);  
+if(count($product)>0){
+$i=0;
+foreach($product as $productlit){?>
+<li>
+   <form name="frm" id="prodetails" method="post" action="productview.php">
+    <?php 
+	$con=$uniform->connection(); 
+    $sqlattsize="select attsize.id as attsizeid,attcreatesize.sizename,attcreatesize.id from attsize inner join attcreatesize on attsize.size=attcreatesize.id where attsize.`status`=1 and attsize.proid='".$productlit['proid']."'";
+	$sqlsize=$uniform->dbselectmulti($sqlattsize);
+	$uniform->close($con);
+	?>
+
+<a href="productDetail.php?proid=<?=$productlit['proid']?>" title="View Details">
+<div class="productWrap">
+<div class="productImageWrap" id="productImageWrapID_<?php echo $productlit['proid'];?>">
+<img alt="<?=$productlit['proname']?>" class="product" src="proimage/<?=$productlit['proimage']?>" />
+</div>
+</div>
+</a>
+<div class="bottomChoicePanel">
+<?php if($productlit['fproid']!='' && $productlit['fstatus']==1){
+	$con=$uniform->connection();	
+	$sqlfreeebies=$uniform->dbselect("select proname,proimage,proprice from product where proid='".$productlit['fproid']."'");
+	$uniform->close($con);
+?>
+<div class="freebies">
+<h5>Freebies</h5>
+<div style="border:solid 1px #dbd8d8; padding:5px; float:left; margin:5px;">
+<div class="freePrice">
+<p><?php echo $sqlfreeebies['proname'];?></p>
+<span>Price : Rs.<?php echo $sqlfreeebies['proprice'];?></span>
+</div>
+<img src="proimage/<?php echo $sqlfreeebies['proimage'];?>" />
+</div>
+</div>
+<?php } ?>
+<span class="productName"><?= $productlit['proname'] ?></span>
+<br />
+<br />  
+<span class="price">
+<span style="color:red; font-weight:normal;">REDUCED PRICE</span><br />
+<?php if($productlit['discount']>0){?><span class="off" style="font-size:14px;">Rs. <?=number_format($productlit['proprice'])?></span>
+<?php } ?>
+<span>Rs. <?php $price = $productlit['proprice']-($productlit['proprice']*$productlit['discount']/100); echo number_format($price,2,'.',','); ?>
+</span>
+</span>
+<div class="listing_table">
+<fieldset>
+
+<input type="hidden" name="price" value="<?= number_format($price,2,'.',',') ?>" />
+<input type="hidden" name="proid" value="<?= $productlit['proid'] ?>" />
+<input type="hidden" name="url22" value="<?=basename($_SERVER['REQUEST_URI']);?>" />
+<input type="hidden" name="hidsize" id="hidsize<?=$productlit['proid'];?>" value="<?php if(arraysize($sqlsize)>0){ echo 1;} else { echo 0;}?>" />
+<?php if(arraysize($sqlsize)>=0){?>
+<legend>Choose Your Size</legend>
+<input type="text" placeholder="QTY." name="qnty" value="1" id="qnty<?=$productlit['proid']?>" />
+
+<select name="size" id="size<?=$productlit['proid'];?>" onchange="return productsize(this.value);">
+<option value=''>--Size--</option>
+<?php 
+	foreach($sqlsize as $sqlsizelist){?>
+    <option value='<?php echo $sqlsizelist['id'];?>,<?php echo $productlit['proid']; ?>'><?php echo $sqlsizelist['sizename'];?></option>
+<?php } ?>
+</select>
+<?php } ?>
+<div id="size_<?=$productlit['proid'];?>" style="display:inline-block;"></div>
+</fieldset>	
+</div>
+    
+<div class="productPriceWrapRight">
+<div class="couple_button">
+<a href="cartinclude/functions.php?action=addToBasket&productID=<?= $productlit['proid'] ?>&productsize=<?= $prsize ?>" class="selectQt" id="featuredProduct_<?= $productlit['proid'] ?>" onClick="return false;">
+<img src="img/buttons/addto.jpg" alt="Add To Basket" onClick="return validate('<?=$i;?>');" />
+</a>
+<a href="productDetail.php?proid=<?=$productlit['proid']?>"> <img src="img/buttons/view.jpg" alt="View Details" /></a>
+<!--<a href="productDetail.php?proid=#ui-accordion-accordion-header-1" >-->
+<?php if($productlit['sizeguide']!=''){?>
+<a href="#" class="topopup" id="<?=$productlit['sizeguide']?>" name="<?=$productlit['proid']?>"> 
+<img  src="img/buttons/sizeguid.jpg" />
+</a> <img src="img/loading.gif" style="display:none;" id="<?=$productlit['proid']?>" />
+<?php } ?>
+<div class="mfix"></div>
+</div>
+</div>
+</div>
+<?php
+if(arraysize($sqlsize)>0){?>
+<?php }
+if($productlit['discount']>0){?><span class="batch">-<?=$productlit['discount']?>%</span><?php } ?>
+</form>
+<div class="mfix"></div>
+</li>
+<?php $i++;}} else { echo '<tr><td>No Record Found</td></tr>';}?>
+</ul>
+</div>
+<div class="mfix"></div>
+</div>
+<div class="mfix"></div>
+</div>
+</div>
+ <div id="toPopup">
+      <div class="close"></div>
+	     <div id="popup_content">
+         <p id="imgid"></p>
+        </div>  
+ </div> <!--toPopup end-->
+ <!--<div class="loader"></div>-->
+ <div id="backgroundPopup"></div>
+<!-- Container Ends Here -->
+<?php include("include/allschoolfooter.php");?>
